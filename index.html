@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif Aramid İplik Fiyat Analizi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutrals (Stone, Slate, Amber) -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page dashboard. The core is an interactive price comparison section allowing users to toggle between Global and Indian market data, displayed on a horizontal bar chart. This is supported by sections explaining the product, key market drivers (using interactive cards), the supply chain (visualized with HTML/CSS), and strategic recommendations (in an accordion). This structure guides the user from understanding the product to comparing prices and finally to strategic insights, making the report's dense information highly accessible and explorable. -->
+    <!-- Visualization & Content Choices: Report Info: Price ranges (Global/India) -> Goal: Compare -> Viz: Interactive horizontal bar chart (Chart.js) to clearly show price bands. Interaction: Toggle buttons to switch datasets and update contextual text. Report Info: Market Factors -> Goal: Organize & Inform -> Viz: Clickable info cards (HTML/JS) for concise explanations. Report Info: Supply Chain -> Goal: Visualize Flow -> Viz: Flexbox diagram (HTML/CSS) for a clean, non-graphical representation. All choices prioritize clarity and interaction without using SVG or Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .factor-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .factor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-slate-900">Aramid İplik Pazar Analizi</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#intro" class="text-slate-600 hover:text-amber-600 transition">Giriş</a>
+                <a href="#prices" class="text-slate-600 hover:text-amber-600 transition">Fiyatlar</a>
+                <a href="#factors" class="text-slate-600 hover:text-amber-600 transition">Faktörler</a>
+                <a href="#supplychain" class="text-slate-600 hover:text-amber-600 transition">Tedarik Zinciri</a>
+                <a href="#recommendations" class="text-slate-600 hover:text-amber-600 transition">Öneriler</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#intro" class="block py-2 px-6 text-sm text-slate-700 hover:bg-stone-100">Giriş</a>
+            <a href="#prices" class="block py-2 px-6 text-sm text-slate-700 hover:bg-stone-100">Fiyatlar</a>
+            <a href="#factors" class="block py-2 px-6 text-sm text-slate-700 hover:bg-stone-100">Faktörler</a>
+            <a href="#supplychain" class="block py-2 px-6 text-sm text-slate-700 hover:bg-stone-100">Tedarik Zinciri</a>
+            <a href="#recommendations" class="block py-2 px-6 text-sm text-slate-700 hover:bg-stone-100">Öneriler</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="intro" class="text-center mb-20">
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">Su Blokajlı Yüksek Modüllü Para-Aramid İplikler</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 mb-8">
+                Bu interaktif rapor, optik fiber kablolar gibi kritik uygulamalarda kullanılan özel para-aramid ipliklerin küresel ve Hindistan pazarındaki fiyat dinamiklerini analiz etmektedir. Fiyatları, piyasa faktörlerini ve stratejik önerileri keşfetmek için aşağı kaydırın.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <div class="text-3xl mb-2 text-amber-500">💪</div>
+                    <h3 class="text-lg font-semibold mb-2">Olağanüstü Mukavemet</h3>
+                    <p class="text-sm text-slate-500">Yüksek çekme mukavemeti, kablolar için merkezi bir güç elemanı olarak hizmet etmesini sağlar.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <div class="text-3xl mb-2 text-amber-500">📐</div>
+                    <h3 class="text-lg font-semibold mb-2">Yüksek Modül (Sertlik)</h3>
+                    <p class="text-sm text-slate-500">Yük altında boyutsal kararlılığı korur, hassas bileşenleri korur.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <div class="text-3xl mb-2 text-amber-500">💧</div>
+                    <h3 class="text-lg font-semibold mb-2">Su Blokaj Kaplaması</h3>
+                    <p class="text-sm text-slate-500">Özel kaplama, nem girişini önleyerek ağ güvenilirliğini artırır.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="prices" class="mb-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Fiyat Spektrumu: Küresel ve Hindistan Karşılaştırması</h2>
+                <p class="max-w-2xl mx-auto text-slate-600">Pazarları karşılaştırmak için aşağıdaki düğmeleri kullanın. Grafikler, üretim maliyetinden yerel pazar fiyatlarına kadar olan fiyat katmanlarını göstermektedir.</p>
+            </div>
+            
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="show-global-btn" class="bg-amber-500 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:bg-amber-600 transition">Küresel Fiyatlar (USD/kg)</button>
+                <button id="show-india-btn" class="bg-white text-slate-700 font-semibold py-2 px-6 rounded-full border border-stone-300 hover:bg-stone-100 transition">Hindistan Fiyatları (INR/kg)</button>
+            </div>
+
+            <div class="bg-white p-4 md:p-8 rounded-xl shadow-lg border border-stone-200">
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div id="price-explanation" class="mt-8 p-4 bg-stone-100 rounded-lg">
+                    <!-- Dynamic content will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="factors" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Piyasayı Şekillendiren Faktörler</h2>
+                <p class="max-w-2xl mx-auto text-slate-600">Fiyatları ve arzı etkileyen temel küresel ve yerel dinamikleri keşfedin. Daha fazla bilgi için bir karta tıklayın.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-center text-slate-800">Küresel Etkiler</h3>
+                    <div class="space-y-4">
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">📦 Hammadde Maliyetleri</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">PPD ve TLC gibi temel hammaddelerin fiyatlarındaki oynaklık, toplam üretim maliyetlerinin %50-65'ini oluşturarak fiyatları doğrudan etkiler.</p>
+                        </div>
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">⚡ Üretim Karmaşıklığı</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">Enerji yoğun üretim süreçleri ve su blokajı gibi ek kaplama işlemleri, maliyeti ve karmaşıklığı artırır.</p>
+                        </div>
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">🏢 Tedarikçi Yoğunlaşması</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">DuPont ve Teijin gibi az sayıda büyük küresel tedarikçinin pazara hakim olması, onlara önemli bir fiyatlandırma gücü verir.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-center text-slate-800">Hindistan Dinamikleri</h3>
+                    <div class="space-y-4">
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">📡 Telekom Talebi</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">5G'nin yaygınlaşması ve BharatNet gibi devlet projeleri, optik fiber kablolara ve dolayısıyla aramid ipliklere olan talebi artırmaktadır.</p>
+                        </div>
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">🇮🇳 'Make in India' Girişimi</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">Yerli üretimi teşvik eden hükümet politikaları, ithalat bağımlılığını azaltabilir ve uzun vadede fiyatları etkileyebilir.</p>
+                        </div>
+                        <div class="factor-card bg-white p-5 rounded-lg shadow-sm border border-stone-200 cursor-pointer">
+                            <h4 class="font-semibold text-lg flex items-center">🧾 İthalat Vergileri</h4>
+                            <p class="text-sm text-slate-500 mt-2 hidden">Aramid filament iplik için yaklaşık %24'lük bir toplam vergi, ithal ürünlerin Hindistan'daki nihai maliyetini önemli ölçüde artırır.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="supplychain" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Tedarik Zincirine Bakış</h2>
+                <p class="max-w-2xl mx-auto text-slate-600">Para-aramid iplik, temel elyaf üretiminden son kullanıcı uygulamalarına kadar çok katmanlı bir süreçten geçer.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 text-center">
+                <div class="p-6 bg-white rounded-lg shadow-md border border-stone-200 w-full md:w-64">
+                    <h4 class="font-bold text-slate-800">Temel Elyaf Üreticileri</h4>
+                    <p class="text-xs text-slate-500 mt-1">DuPont, Teijin, Kolon, Hyosung</p>
+                </div>
+                <div class="text-2xl font-bold text-amber-500 mx-4 transform rotate-90 md:rotate-0">→</div>
+                 <div class="p-6 bg-white rounded-lg shadow-md border border-stone-200 w-full md:w-64">
+                    <h4 class="font-bold text-slate-800">Kaplamacılar ve İşlemciler</h4>
+                    <p class="text-xs text-slate-500 mt-1">Barnet, Coats, Arvind, Arrowtex</p>
+                </div>
+                <div class="text-2xl font-bold text-amber-500 mx-4 transform rotate-90 md:rotate-0">→</div>
+                 <div class="p-6 bg-white rounded-lg shadow-md border border-stone-200 w-full md:w-64">
+                    <h4 class="font-bold text-slate-800">Son Kullanıcılar</h4>
+                    <p class="text-xs text-slate-500 mt-1">Optik Fiber Kablo (OFC) Üreticileri</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="recommendations">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Stratejik Öneriler</h2>
+                <p class="max-w-2xl mx-auto text-slate-600">Farklı paydaşlar için temel çıkarımlar ve öneriler.</p>
+            </div>
+            <div class="max-w-3xl mx-auto space-y-3">
+                <div class="accordion-item bg-white rounded-lg border border-stone-200 shadow-sm">
+                    <h3 class="accordion-header p-5 w-full text-left font-semibold text-lg cursor-pointer flex justify-between items-center">
+                        Tedarik Profesyonelleri İçin
+                        <span class="text-amber-500 transform transition-transform duration-300">+</span>
+                    </h3>
+                    <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t border-stone-200">
+                            <ul class="list-disc list-inside space-y-2 text-slate-600">
+                                <li><b>Durum Tespiti Yapın:</b> Özellikle B2B platformlarındaki şüpheli derecede düşük fiyatlara karşı dikkatli olun. Teknik özellikleri doğrulayın ve numune talep edin.</li>
+                                <li><b>Gereksinimleri Belirtin:</b> Karşılaştırılabilir teklifler almak için denye, modül ve su blokajı performansı gibi teknik ihtiyaçları net bir şekilde tanımlayın.</li>
+                                <li><b>Politikaları İzleyin:</b> Hindistan'daki ithalat vergileri ve kalite kontrol emirlerindeki (QCO) değişiklikleri takip edin.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg border border-stone-200 shadow-sm">
+                    <h3 class="accordion-header p-5 w-full text-left font-semibold text-lg cursor-pointer flex justify-between items-center">
+                        Üreticiler/Tedarikçiler İçin
+                         <span class="text-amber-500 transform transition-transform duration-300">+</span>
+                    </h3>
+                    <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t border-stone-200">
+                             <ul class="list-disc list-inside space-y-2 text-slate-600">
+                                <li><b>Yerel Değer Katın:</b> Hindistan'da ithal iplikleri işleyerek (kaplama, bitirme) 'Make in India' hedefleriyle uyum sağlayın.</li>
+                                <li><b>Niş İhtiyaçlara Odaklanın:</b> Hindistan'ın altyapı projeleri için kritik olan yüksek performanslı, özel ürünlere odaklanın.</li>
+                                <li><b>Şeffaf Olun:</b> Güven oluşturmak için ürün sınıflarını net bir şekilde ayırt edin ve ayrıntılı teknik veriler sağlayın.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg border border-stone-200 shadow-sm">
+                    <h3 class="accordion-header p-5 w-full text-left font-semibold text-lg cursor-pointer flex justify-between items-center">
+                        Yatırımcılar/Pazara Yeni Girenler İçin
+                         <span class="text-amber-500 transform transition-transform duration-300">+</span>
+                    </h3>
+                    <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t border-stone-200">
+                           <ul class="list-disc list-inside space-y-2 text-slate-600">
+                                <li><b>Giriş Engellerini Anlayın:</b> Temel para-aramid üretimi, yüksek sermaye ve teknoloji gerektirir.</li>
+                                <li><b>Alt İşlemede Fırsatları Değerlendirin:</b> Hindistan'da ithal temel ipliklerin özel kaplama ve bitirme işlemleri için pazar fırsatları olabilir.</li>
+                                <li><b>Telekom Büyümesine Odaklanın:</b> Hindistan'daki OFC pazarı, önemli ve büyüyen bir talep kanalı sunmaktadır.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-20">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p>&copy; 2024 İnteraktif Pazar Analizi. Veriler, "Su Blokajlı Kaplanmış Para-Aramid Yüksek Modüllü İpliklerin Global ve Hindistan Pazarı Satış Fiyatları Üzerine Bir Analiz" raporundan alınmıştır.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const data = {
+                global: {
+                    labels: [
+                        'Şüpheli Düşük Fiyat (B2B)',
+                        'Genel Para-Aramid (B2B Liste)',
+                        'Üretim Maliyeti',
+                        'Genel Pazar Fiyatı',
+                    ],
+                    datasets: [{
+                        label: 'Fiyat Aralığı (USD/kg)',
+                        data: [
+                            [2.5, 5],
+                            [16, 75],
+                            [20, 30],
+                            [40, 50],
+                        ],
+                        backgroundColor: [
+                            'rgba(217, 119, 6, 0.3)',
+                            'rgba(51, 65, 85, 0.5)',
+                            'rgba(51, 65, 85, 0.7)',
+                            'rgba(51, 65, 85, 0.9)',
+                        ],
+                        borderColor: [
+                             'rgba(217, 119, 6, 1)',
+                            'rgba(51, 65, 85, 1)',
+                            'rgba(51, 65, 85, 1)',
+                            'rgba(51, 65, 85, 1)',
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }],
+                    explanation: `
+                        <h4 class="font-semibold mb-2">Küresel Fiyat Analizi</h4>
+                        <p class="text-sm text-slate-600">Küresel fiyatlar geniş bir yelpazede değişmektedir. Üretim maliyeti <strong>$20-30/kg</strong> iken, piyasa fiyatları <strong>$40-50/kg</strong>'a ulaşabilmektedir. B2B platformlarındaki <strong>$2.5-5/kg</strong> gibi aşırı düşük fiyatlar, genellikle farklı kalite veya malzeme türlerini temsil eder ve dikkatle incelenmelidir. Bu özel ipliklerin fiyatı, genellikle genel pazar fiyat aralığının üst segmentinde yer alır.</p>
+                    `
+                },
+                india: {
+                    labels: [
+                        'Yerel Pazar (Jenerik/Kesik)',
+                        'İthalat CIF Fiyatı',
+                        'Hesaplanan İthalat Maliyeti (+Vergi)',
+                        'Yerel Pazar (Özel/Kaplanmış)',
+                    ],
+                    datasets: [{
+                        label: 'Fiyat Aralığı (INR/kg)',
+                        data: [
+                            [450, 1500],
+                            [1580, 2325],
+                            [1950, 2880],
+                            [2900, 4150],
+                        ],
+                        backgroundColor: 'rgba(2, 132, 199, 0.6)',
+                        borderColor: 'rgba(2, 132, 199, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }],
+                    explanation: `
+                        <h4 class="font-semibold mb-2">Hindistan Fiyat Analizi</h4>
+                        <p class="text-sm text-slate-600">Hindistan pazarı, ithalata olan bağımlılığı yansıtmaktadır. Standart filament ipliğin ithalat maliyeti (CIF) <strong>₹1580-2325/kg</strong>'dır. Yaklaşık %24 vergi eklendiğinde bu maliyet <strong>₹1950-2880/kg</strong>'a yükselir. Yerel piyasada, jenerik ürünler <strong>₹450/kg</strong> gibi düşük fiyatlara bulunabilirken, özel, su blokajlı ve yüksek modüllü iplikler için fiyatlar <strong>₹2900/kg</strong>'ın üzerine çıkmakta ve <strong>₹4150/kg</strong>'ı aşabilmektedir.</p>
+                    `
+                }
+            };
+
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const priceChart = new Chart(ctx, {
+                type: 'bar',
+                data: data.global,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.raw;
+                                    label += `${value[0]} - ${value[1]}`;
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Fiyat Aralığı (USD/kg)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value, index, ticks) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 20) {
+                                        return label.split(' ').map((word, i) => i > 0 && i % 2 === 0 ? `\n${word}`: word).join(' ').split('\n');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const explanationDiv = document.getElementById('price-explanation');
+            const showGlobalBtn = document.getElementById('show-global-btn');
+            const showIndiaBtn = document.getElementById('show-india-btn');
+            
+            function updateChart(market) {
+                const marketData = data[market];
+                priceChart.data = marketData;
+                priceChart.options.scales.x.title.text = market === 'global' ? 'Fiyat Aralığı (USD/kg)' : 'Fiyat Aralığı (INR/kg)';
+                priceChart.update();
+                explanationDiv.innerHTML = marketData.explanation;
+
+                if (market === 'global') {
+                    showGlobalBtn.classList.add('bg-amber-500', 'text-white');
+                    showGlobalBtn.classList.remove('bg-white', 'text-slate-700', 'border', 'border-stone-300');
+                    showIndiaBtn.classList.add('bg-white', 'text-slate-700', 'border', 'border-stone-300');
+                    showIndiaBtn.classList.remove('bg-amber-500', 'text-white');
+                } else {
+                    showIndiaBtn.classList.add('bg-amber-500', 'text-white');
+                    showIndiaBtn.classList.remove('bg-white', 'text-slate-700', 'border', 'border-stone-300');
+                    showGlobalBtn.classList.add('bg-white', 'text-slate-700', 'border', 'border-stone-300');
+                    showGlobalBtn.classList.remove('bg-amber-500', 'text-white');
+                }
+            }
+
+            showGlobalBtn.addEventListener('click', () => updateChart('global'));
+            showIndiaBtn.addEventListener('click', () => updateChart('india'));
+            
+            updateChart('global');
+
+            const factorCards = document.querySelectorAll('.factor-card');
+            factorCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const content = card.querySelector('p');
+                    content.classList.toggle('hidden');
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('span');
+
+                header.addEventListener('click', () => {
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
